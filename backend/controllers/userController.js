@@ -143,3 +143,82 @@ export const editProfile = async (res, req) => {
     console.log(error);
   }
 };
+
+export const getSuggestedUsers = async (res, req) => {
+  try {
+    const suggestUsers = await User.find({ _id: { $ne: req.id } }).select(
+      "-password"
+    );
+    if (!suggestUsers) {
+      return res
+        .status(400)
+        .json({ message: "Currently do not have any user !", success: false });
+    }
+    return res.status(200).json({
+      message: "Currently do not have any user !",
+      success: true,
+      users: suggestUsers,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const followOrUnfollow = async (req, res) => {
+  try {
+    const followKrneWala = req.id;
+    const jiskoFollowKaruga = req.params.id;
+    if (followKrneWala == jiskoFollowKaruga) {
+      return res.status(400).json({
+        message: "you can’t folllow/unfollow yourself",
+        message: false,
+      });
+    }
+    const user = await User.findById(followKrneWala);
+    const targetUser = await User.findById(jiskoFollowKaruga);
+
+    if (!user || !targetUser) {
+      return res.status(400).json({
+        message: "User not found",
+        message: false,
+      });
+    }
+
+    const isFollowing = user.following.includes(jiskoFollowKaruga);
+    if (isFollowing) {
+      // unfollow logic aaayega
+      await Promise.all([
+        User.updateOne(
+          { _id: followKrneWala },
+          { $pull: { following: jiskoFollowKaruga } }
+        ),
+        User.updateOne(
+          { _id: jiskoFollowKaruga },
+          { $pull: { followers: followKrneWala } }
+        ),
+      ]);
+      return res.status(200).json({
+        message: "Unfollowed  Successfully",
+        message: true,
+      });
+    } else {
+      //follow logic aayega
+      await Promise.all([
+        User.updateOne(
+          { _id: followKrneWala },
+          { $push: { following: jiskoFollowKaruga } }
+        ),
+        User.updateOne(
+          { _id: jiskoFollowKaruga },
+          { $push: { followers: followKrneWala } }
+        ),
+      ]);
+      return res.status(200).json({
+        message: "followed  Successfully",
+        message: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
