@@ -14,7 +14,7 @@ export const register = async (req, res) => {
       });
     }
     const user = await User.findOne({ email });
-    if (email) {
+    if (user) {
       return res.status(401).json({
         message: "This email already register",
         success: false,
@@ -91,7 +91,7 @@ export const logout = async (req, res) => {
   try {
     return res.cookie("token", "", { maxage: 0 }).json({
       message: "Logout successfully",
-      message: true,
+      success: true,
     });
   } catch (error) {
     console.log(error);
