@@ -146,7 +146,7 @@ export const editProfile = async (req, res) => {
   }
 };
 
-export const getSuggestedUsers = async (req, re) => {
+export const getSuggestedUsers = async (req, res) => {
   try {
     const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select(
       "-password"
@@ -154,7 +154,7 @@ export const getSuggestedUsers = async (req, re) => {
     if (!suggestedUsers) {
       return res.status(400).json({
         message: "Currently do not have any users",
-        success: false
+        success: false,
       });
     }
     return res.status(200).json({
@@ -201,7 +201,7 @@ export const followOrUnfollow = async (req, res) => {
       ]);
       return res.status(200).json({
         message: "Unfollowed  Successfully",
-        message: true,
+        success: true,
       });
     } else {
       //follow logic aayega
@@ -217,7 +217,7 @@ export const followOrUnfollow = async (req, res) => {
       ]);
       return res.status(200).json({
         message: "followed  Successfully",
-        message: true,
+        success: true,
       });
     }
   } catch (error) {
