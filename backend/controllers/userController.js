@@ -69,7 +69,7 @@ export const login = async (req, res) => {
       posts: user.posts,
     };
     const token = await jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-      expiresIn: "1",
+      expiresIn: "1d",
     });
     return res
       .cookie("token", token, {
@@ -98,13 +98,13 @@ export const logout = async (req, res) => {
   }
 };
 
-export const getProfile = async (res, req) => {
+export const getProfile = async (req, res) => {
   try {
     const userId = req.params.id;
-    let user = await User.findById(userId);
+    let user = await User.findById(userId).select("-password");
     return res.status(200).json({
-      user,
       success: true,
+      user,
     });
   } catch (error) {
     console.log(error);
