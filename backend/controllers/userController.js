@@ -173,7 +173,7 @@ export const followOrUnfollow = async (req, res) => {
     if (followKrneWala == jiskoFollowKaruga) {
       return res.status(400).json({
         message: "you can’t folllow/unfollow yourself",
-        message: false,
+        success: false,
       });
     }
     const user = await User.findById(followKrneWala);
@@ -182,7 +182,7 @@ export const followOrUnfollow = async (req, res) => {
     if (!user || !targetUser) {
       return res.status(400).json({
         message: "User not found",
-        message: false,
+        success: false,
       });
     }
 
