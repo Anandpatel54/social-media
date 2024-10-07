@@ -179,3 +179,105 @@ export const addComment = async (req, res) => {
     console.log(error);
   }
 };
+
+export const getCommentsOfPsst = async (req, res) => {
+  try {
+    const { postId } = req.params.id;
+
+    const comments = await Comment.find({ post: postId }).populate(
+      "author",
+      "username",
+      "profilePicture"
+    );
+    if (!comments) {
+      return res.status(404).json({
+        message: "No comments found for this post",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      comments,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deletePost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const authorId = req.id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "post not found !",
+        success: false,
+      });
+    }
+    // check if the logged-in user is the owner the post
+    if (post.author.toString() !== authorId) {
+      return res.status(403).json({
+        message: "Unauthorized!",
+        success: false,
+      });
+    }
+    // delete post
+    await Post.findByIdAndDelete(postId);
+
+    // remove the post id from the user post
+    let user = await User.findById(authorId);
+    user.posts = user.posts.filter((id) => id.toString() !== postId);
+    await user.save();
+
+    //delete associated comment
+    await Comment.deleteMany({ post: postId });
+
+    return res.status(200).json({
+      message: "post deleted",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const bookmarkPost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const authorId = req.id;
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "post not found !",
+        success: false,
+      });
+    }
+
+    const user = await User.findById(authorId);
+    if (user.bookmarks.includes(post._id)) {
+      // already bookmark -> remove from the bookmark
+      await user.updateOne({ $pull: { bookmarks: post._id } });
+      await user.save();
+      return res.status(200).json({
+        type: "unsaved",
+        message: "post remove from bookmarks",
+        success: true,
+      });
+    } else {
+      // bookmarks karna padega
+      await user.updateOne({ $addToSet: { bookmarks: post._id } });
+      await user.save();
+      return res.status(200).json({
+        type: "saved",
+        message: "post bookmarked",
+        success: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
