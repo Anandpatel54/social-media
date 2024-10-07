@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import cloudinary from "../utils/cloudinary";
+import cloudinary from "../utils/cloudinary.js";
 import { Post } from "../models/postModel.js";
 import { User } from "../models/userModel.js";
 import { Comment } from "../models/commentModel.js";
@@ -180,7 +180,7 @@ export const addComment = async (req, res) => {
   }
 };
 
-export const getCommentsOfPsst = async (req, res) => {
+export const getCommentsOfPost = async (req, res) => {
   try {
     const { postId } = req.params.id;
 
