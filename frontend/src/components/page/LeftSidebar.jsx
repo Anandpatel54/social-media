@@ -12,8 +12,12 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuthUser } from "@/redux/authSlice";
 
 const LeftSidebar = () => {
+  const { user } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const logouthandler = async () => {
     try {
@@ -21,6 +25,7 @@ const LeftSidebar = () => {
         withCredentials: true,
       });
       if (res.data.success) {
+        dispatch(setAuthUser(null));
         navigate("/login");
         toast.success(res.data.message);
       }
@@ -47,7 +52,7 @@ const LeftSidebar = () => {
     {
       icon: (
         <Avatar className="w-6 h-6">
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+          <AvatarImage src={user?.profilePicture} alt="@shadcn" />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
       ),

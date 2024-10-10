@@ -6,12 +6,16 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuthUser } from "@/redux/authSlice";
 
 const Login = () => {
   const [input, setInput] = useState({
     email: "",
     password: "",
   });
+  const { user } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const changeEventHandlar = (e) => {
@@ -33,7 +37,8 @@ const Login = () => {
         }
       );
       if (res.data.success) {
-        navigate("/")
+        dispatch(setAuthUser(res.data.user));
+        navigate("/");
         toast.success(res.data.message);
         setInput({
           email: "",
@@ -87,7 +92,9 @@ const Login = () => {
             Please wait
           </Button>
         ) : (
-          <Button type="submit" className="">Login</Button>
+          <Button type="submit" className="">
+            Login
+          </Button>
         )}
 
         <span className="text-center">
