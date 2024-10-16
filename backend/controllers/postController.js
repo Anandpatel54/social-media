@@ -35,7 +35,7 @@ export const addNewPost = async (req, res) => {
       user.posts.push(post._id);
       await user.save();
     }
-    await post.populate({ path: "auther", select: "-password" });
+    await post.populate({ path: "author", select: "-password" });
 
     return res.status(201).json({
       message: "New Post Added",

@@ -41,10 +41,11 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(401).json({
-        message: "somthing is messing, please check",
+        message: "Something is missing, please check",
         success: false,
       });
     }
+
     let user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
@@ -52,6 +53,7 @@ export const login = async (req, res) => {
         success: false,
       });
     }
+
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return res.status(401).json({
@@ -60,15 +62,19 @@ export const login = async (req, res) => {
       });
     }
 
-    const populatedpost = await Promise.all(
+    const populatedPosts = await Promise.all(
       user.posts.map(async (postId) => {
         const post = await Post.findById(postId);
-        if (post.author.equals(user._id)) {
-          return post;
+        // Check if post exists and the author matches
+        if (post && post.author.equals(user._id)) {
+          return post; // Return post if author matches
         }
-        return null;
+        return null; // Return null if post not found or author does not match
       })
     );
+
+    // Filter out null posts
+    const filteredPosts = populatedPosts.filter((post) => post !== null);
 
     user = {
       _id: user._id,
@@ -78,16 +84,18 @@ export const login = async (req, res) => {
       bio: user.bio,
       followers: user.followers,
       following: user.following,
-      posts: populatedpost,
+      posts: filteredPosts,
     };
+
     const token = await jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
       expiresIn: "1d",
     });
+
     return res
       .cookie("token", token, {
         httpOnly: true,
         sameSite: "strict",
-        maxage: 1 * 24 * 60 * 60 * 1000,
+        maxAge: 1 * 24 * 60 * 60 * 1000,
       })
       .json({
         message: `Welcome back ${user.username}`,
@@ -95,7 +103,11 @@ export const login = async (req, res) => {
         user,
       });
   } catch (error) {
-    console.log(error);
+    console.error(error); // Logging the error for debugging
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
   }
 };
 
