@@ -6,7 +6,7 @@ import { FaRegHeart } from "react-icons/fa";
 import CommentDialog from "../page/CommentDialog";
 import { useState } from "react";
 
-const Post = () => {
+const Post = ({ post }) => {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -23,10 +23,10 @@ const Post = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src="" alt="post_image" />
+            <AvatarImage src={post.author?.profilePicture} alt="post_image" />
             <AvatarFallback>Cn</AvatarFallback>
           </Avatar>
-          <h1>username</h1>
+          <h1>{post.author?.username}</h1>
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -50,7 +50,7 @@ const Post = () => {
       </div>
       <img
         className="rounded-md my-2 w-full aspect-square object-cover"
-        src="https://images.unsplash.com/photo-1726856667612-5252bd459a69?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw3fHx8ZW58MHx8fHx8"
+        src={post.image}
         alt="post_img"
       />
       <div className="flex items-center justify-between">
@@ -71,12 +71,18 @@ const Post = () => {
         />
       </div>
       <span className="font-medium block mt-2 text-sm cursor-pointer">
-        1k likes
+        {post.likes?.length} likes
       </span>
       <p>
-        <span className="font-medium mr-2">username</span>caption
+        <span className="font-medium mr-2">{post.author?.username}</span>
+        {post.caption}
       </p>
-      <span onClick={() => setOpen(true)} className="cursor-pointer text-sm text-gray-400">View all 10 comments</span>
+      <span
+        onClick={() => setOpen(true)}
+        className="cursor-pointer text-sm text-gray-400"
+      >
+        {post.comments?.length} comments
+      </span>
       <CommentDialog open={open} setOpen={setOpen} />
       <div className="flex items-center justify-between">
         <input
