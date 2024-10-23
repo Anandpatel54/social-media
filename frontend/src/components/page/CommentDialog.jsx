@@ -4,9 +4,12 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import Comment from "./Comment";
 
 const CommentDialog = ({ open, setOpen }) => {
   const [text, setText] = useState("");
+  const { selectedPost } = useSelector((store) => store.post);
 
   const changeEventHandlar = (e) => {
     const inputText = e.target.value;
@@ -28,10 +31,10 @@ const CommentDialog = ({ open, setOpen }) => {
           className="max-w-3xl p-0 flex flex-col"
         >
           <div className="flex flex-1">
-            <div className="w-1/2">
+            <div className="w-1/2 h-[55vh]">
               <img
                 className="rounded-l-md w-full h-full object-cover"
-                src="https://images.unsplash.com/photo-1726856667612-5252bd459a69?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw3fHx8ZW58MHx8fHx8"
+                src={selectedPost?.image}
                 alt="post_img"
               />
             </div>
@@ -40,12 +43,14 @@ const CommentDialog = ({ open, setOpen }) => {
                 <div className="flex items-center gap-3">
                   <Link>
                     <Avatar>
-                      <AvatarImage src="" />
+                      <AvatarImage src={selectedPost?.author?.profilePicture} />
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                   </Link>
                   <div>
-                    <Link className="font-semibold">username</Link>
+                    <Link className="font-semibold">
+                      {selectedPost?.author?.username}
+                    </Link>
                     {/*  <span className="text-gray-600 text-sm">Bio here....</span>*/}
                   </div>
                 </div>
@@ -68,8 +73,9 @@ const CommentDialog = ({ open, setOpen }) => {
               </div>
               <hr />
               <div className="flex-1 overflow-y-auto max-h-94 p-4">
-                comments ayege comments ayege comments ayege comments ayege
-                comments ayegecomments ayege
+                {selectedPost?.comments.map((comment) => (
+                  <Comment key={comment._id} comment={comment} />
+                ))}
               </div>
               <div className="p-4">
                 <div className="flex items-center gap-2">

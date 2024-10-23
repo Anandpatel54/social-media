@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import axios from "axios";
-import { setPosts } from "@/redux/postSlice";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
 
 const Post = ({ post }) => {
   const [text, setText] = useState("");
@@ -100,6 +100,7 @@ const Post = ({ post }) => {
         );
         dispatch(setPosts(updatedPostData));
         toast.success(res.data.message);
+        setText("");
       }
     } catch (error) {
       console.log(error);
@@ -165,7 +166,10 @@ const Post = ({ post }) => {
           )}
 
           <MessageCircle
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              dispatch(setSelectedPost(post));
+              setOpen(true);
+            }}
             className="cursor-pointer hover: text-gray-600"
           />
           <Send size={"22px"} className="cursor-pointer hover: text-gray-600" />
@@ -183,7 +187,10 @@ const Post = ({ post }) => {
         {post.caption}
       </p>
       <span
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          dispatch(setSelectedPost(post));
+          setOpen(true);
+        }}
         className="cursor-pointer text-sm text-gray-400"
       >
         View all {comment.length} comments
@@ -197,7 +204,14 @@ const Post = ({ post }) => {
           onChange={changeeventHandler}
           className="outline-none text-sm w-full"
         />
-        {text && <span onClick={commentHandlar} className="text-[#3BADF8] cursor-pointer">Post</span>}
+        {text && (
+          <span
+            onClick={commentHandlar}
+            className="text-[#3BADF8] cursor-pointer"
+          >
+            Post
+          </span>
+        )}
       </div>
     </div>
   );
