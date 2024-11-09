@@ -150,30 +150,34 @@ export const dislikePost = async (req, res) => {
 export const addComment = async (req, res) => {
   try {
     const postId = req.params.id;
-    const commentKrneValeUserKiId = req.id;
+    const commentKrneWalaUserKiId = req.id;
 
     const { text } = req.body;
+
     const post = await Post.findById(postId);
 
-    if (!text) {
+    if (!text)
       return res
         .status(400)
         .json({ message: "text is required", success: false });
-    }
+
     const comment = await Comment.create({
       text,
-      author: commentKrneValeUserKiId,
+      author: commentKrneWalaUserKiId,
       post: postId,
     });
+
     await comment.populate({
-      path:'author',
-      select:"username profilePicture"
-  });
+      path: "author",
+      select: "username profilePicture",
+    });
+
     post.comments.push(comment._id);
     await post.save();
 
-    return res.status(200).json({
-      message: "added Comment",
+    return res.status(201).json({
+      message: "Comment Added",
+      comment,
       success: true,
     });
   } catch (error) {
@@ -183,23 +187,19 @@ export const addComment = async (req, res) => {
 
 export const getCommentsOfPost = async (req, res) => {
   try {
-    const { postId } = req.params.id;
+    const postId = req.params.id;
 
     const comments = await Comment.find({ post: postId }).populate(
       "author",
-      "username",
-      "profilePicture"
+      "username profilePicture"
     );
-    if (!comments) {
-      return res.status(404).json({
-        message: "No comments found for this post",
-        success: false,
-      });
-    }
-    return res.status(200).json({
-      comments,
-      success: true,
-    });
+
+    if (!comments)
+      return res
+        .status(404)
+        .json({ message: "No comments found for this post", success: false });
+
+    return res.status(200).json({ success: true, comments });
   } catch (error) {
     console.log(error);
   }
