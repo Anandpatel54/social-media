@@ -3,13 +3,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Comment from "./Comment";
+import axios from "axios";
+import { toast } from "sonner";
+import { setPosts } from "@/redux/postSlice";
 
 const CommentDialog = ({ open, setOpen }) => {
   const [text, setText] = useState("");
-  const { selectedPost } = useSelector((store) => store.post);
+  const { selectedPost, posts } = useSelector((store) => store.post);
+  const [comment, setComment] = useState([]);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (selectedPost) {
+      setComment(selectedPost.comments);
+    }
+  }, [selectedPost]);
 
   const changeEventHandlar = (e) => {
     const inputText = e.target.value;
@@ -19,9 +30,36 @@ const CommentDialog = ({ open, setOpen }) => {
       setText("");
     }
   };
-  const sendMessageHandlar = async (e) => {
-    e.preventDefault();
-    alert(text);
+
+  const sendMessageHandler = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/post/${selectedPost?._id}/comment`,
+        { text },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        const updatedCommentData = [...comment, res.data.comment];
+        setComment(updatedCommentData);
+
+        const updatedPostData = posts.map((p) =>
+          p._id === selectedPost._id
+            ? { ...p, comments: updatedCommentData }
+            : p
+        );
+        dispatch(setPosts(updatedPostData));
+        toast.success(res.data.message);
+        setText("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div>
@@ -73,7 +111,7 @@ const CommentDialog = ({ open, setOpen }) => {
               </div>
               <hr />
               <div className="flex-1 overflow-y-auto max-h-94 p-4">
-                {selectedPost?.comments.map((comment) => (
+                {comment?.map((comment) => (
                   <Comment key={comment._id} comment={comment} />
                 ))}
               </div>
@@ -87,7 +125,7 @@ const CommentDialog = ({ open, setOpen }) => {
                     className="outline-none text-sm w-full border border-gray-300 p-2 rounded-md"
                   />
                   <Button
-                    onClick={sendMessageHandlar}
+                    onClick={sendMessageHandler}
                     disabled={!text.trim()}
                     variant="outline"
                     className=""

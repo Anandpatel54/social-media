@@ -91,20 +91,21 @@ const Post = ({ post }) => {
           withCredentials: true,
         }
       );
+      console.log(res.data);
       if (res.data.success) {
-        const updatedCommentData = [...comment, res.data.message];
+        const updatedCommentData = [...comment, res.data.comment];
         setComment(updatedCommentData);
 
         const updatedPostData = posts.map((p) =>
           p._id === post._id ? { ...p, comments: updatedCommentData } : p
         );
+
         dispatch(setPosts(updatedPostData));
         toast.success(res.data.message);
         setText("");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
     }
   };
   return (
